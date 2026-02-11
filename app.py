@@ -760,9 +760,14 @@ def drive_delete(file_id):
 
 
 if __name__ == "__main__":
+    import os
+    # Create required directories
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     os.makedirs(os.path.join(OUTPUT_FOLDER, "pdf"), exist_ok=True)
     os.makedirs(os.path.join(OUTPUT_FOLDER, "docx"), exist_ok=True)
     os.makedirs(os.path.join(OUTPUT_FOLDER, "json"), exist_ok=True)
     os.makedirs(CREDENTIALS_FOLDER, exist_ok=True)
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    
+    # Get port from environment (Render sets this)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port)
