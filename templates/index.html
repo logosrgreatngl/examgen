@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ExamGen AI — GHORI ACADEMY</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: { extend: { colors: { "primary": "#6b5be6", "background-dark": "#131121" }, fontFamily: { "display": ["Inter", "sans-serif"], "mono": ["JetBrains Mono", "monospace"] } } },
+}
+</script>
+<style>
+.glass-panel { background: rgba(255,255,255,0.03); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,0.08); }
+.glass-card-hover:hover { background: rgba(107,91,230,0.15); border-color: rgba(107,91,230,0.4); }
+.step { display: none; } .step.active { display: block; }
+.subject-card.selected { background: rgba(107,91,230,0.15) !important; border-color: rgba(107,91,230,0.6) !important; }
+.paper-texture { background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 20px 20px; }
+.modal { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+.modal.active { display: flex; align-items: center; justify-content: center; }
+@keyframes shimmer { 0% { transform: translateX(-200%) skewX(-12deg); } 100% { transform: translateX(200%) skewX(-12deg); } }
+</style>
+</head>
+
+<body class="bg-background-dark font-display text-slate-100 antialiased">
+<div class="max-w-lg mx-auto min-h-screen relative overflow-hidden">
+
+<!-- Background Glow -->
+<div class="fixed top-0 left-1/2 w-[500px] h-96 bg-primary/20 blur-[100px] pointer-events-none rounded-full -translate-y-1/2 -translate-x-1/2 opacity-60"></div>
+
+<!-- Header -->
+<header class="sticky top-0 z-50 glass-panel px-5 py-4 flex justify-between items-center border-b border-white/5">
+    <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center text-white font-bold text-sm">AI</div>
+        <h1 class="text-lg font-bold">ExamGen</h1>
+        <span class="text-[10px] text-slate-500 ml-1">GHORI ACADEMY</span>
+    </div>
+    <button onclick="showHistory()" class="p-2 rounded-full hover:bg-white/10 transition-colors text-slate-400 hover:text-white">
+        <span class="material-icons-round">folder</span>
+    </button>
+</header>
+
+<!-- Stepper -->
+<div class="px-5 py-4" id="stepper">
+    <div class="flex items-center justify-between relative">
+        <div class="absolute top-4 left-0 w-full h-0.5 bg-slate-800 -z-10"></div>
+        <div class="absolute top-4 left-0 h-0.5 bg-primary -z-10 transition-all" id="stepper-progress" style="width:0%"></div>
+        <div class="flex flex-col items-center gap-1 step-dot" data-step="1"><div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold border-4 border-background-dark">1</div><span class="text-[10px] font-medium text-primary">Subject</span></div>
+        <div class="flex flex-col items-center gap-1 step-dot" data-step="2"><div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-500 flex items-center justify-center text-xs font-bold">2</div><span class="text-[10px] font-medium text-slate-500">Upload</span></div>
+        <div class="flex flex-col items-center gap-1 step-dot" data-step="3"><div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-500 flex items-center justify-center text-xs font-bold">3</div><span class="text-[10px] font-medium text-slate-500">Review</span></div>
+        <div class="flex flex-col items-center gap-1 step-dot" data-step="4"><div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-500 flex items-center justify-center text-xs font-bold">4</div><span class="text-[10px] font-medium text-slate-500">Export</span></div>
+    </div>
+</div>
+
+<main class="relative z-10 pb-32 px-5">
+
+<!-- STEP 1: Subject -->
+<section class="step active" id="step-1">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60 mb-2">Pick Your Subject</h2>
+    </div>
+    <div class="grid grid-cols-2 gap-3 mb-6" id="subject-grid">
+        <button class="subject-card glass-panel p-4 rounded-xl text-left glass-card-hover transition-all" data-subject="chemistry" onclick="selectSubject(this)">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center mb-3"><span class="material-icons-round">science</span></div>
+            <div class="font-medium text-white text-sm">Chemistry</div><div class="text-xs text-slate-400 mt-1">60 marks</div>
+        </button>
+        <button class="subject-card glass-panel p-4 rounded-xl text-left glass-card-hover transition-all" data-subject="biology" onclick="selectSubject(this)">
+            <div class="w-10 h-10 rounded-lg bg-green-500/20 text-green-400 flex items-center justify-center mb-3"><span class="material-icons-round">biotech</span></div>
+            <div class="font-medium text-white text-sm">Biology</div><div class="text-xs text-slate-400 mt-1">60 marks</div>
+        </button>
+        <button class="subject-card glass-panel p-4 rounded-xl text-left glass-card-hover transition-all" data-subject="physics" onclick="selectSubject(this)">
+            <div class="w-10 h-10 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center mb-3"><span class="material-icons-round">bolt</span></div>
+            <div class="font-medium text-white text-sm">Physics</div><div class="text-xs text-slate-400 mt-1">60 marks</div>
+        </button>
+        <button class="subject-card glass-panel p-4 rounded-xl text-left glass-card-hover transition-all" data-subject="maths" onclick="selectSubject(this)">
+            <div class="w-10 h-10 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center mb-3"><span class="material-icons-round">functions</span></div>
+            <div class="font-medium text-white text-sm">Mathematics</div><div class="text-xs text-slate-400 mt-1">75 marks</div>
+        </button>
+    </div>
+    <button class="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold disabled:opacity-40 flex items-center justify-center gap-2" id="btn-step1-next" disabled onclick="goStep(2)">Next <span class="material-icons-round">arrow_forward</span></button>
+</section>
+
+<!-- STEP 2: Upload -->
+<section class="step" id="step-2">
+    <div class="text-center mb-6"><h2 class="text-2xl font-bold text-white mb-2">Upload Your Notes</h2></div>
+    <div class="relative group cursor-pointer mb-4" onclick="document.getElementById('file-input').click()">
+        <div class="w-full border-2 border-dashed border-slate-700 hover:border-primary bg-slate-900/50 rounded-xl p-8 flex flex-col items-center text-center transition-colors">
+            <div class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center mb-4"><span class="material-icons-round text-2xl text-slate-300">upload_file</span></div>
+            <h4 class="text-white font-medium mb-1">Tap to Upload</h4>
+            <p class="text-xs text-slate-500">PNG, JPG — Max 5MB each</p>
+        </div>
+    </div>
+    <input type="file" id="file-input" accept=".png,.jpg,.jpeg" multiple class="hidden" onchange="handleFiles(this.files)">
+    <div id="upload-previews" class="grid grid-cols-3 gap-2 mb-4"></div>
+    <p class="text-xs text-slate-500 mb-4 text-center" id="upload-count">No images selected</p>
+    <div class="flex gap-3">
+        <button class="flex-1 py-3 rounded-xl bg-slate-800 text-slate-300 font-medium" onclick="goStep(1)">← Back</button>
+        <button class="flex-1 py-3 rounded-xl bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold disabled:opacity-40 flex items-center justify-center gap-1" id="btn-step2-next" disabled onclick="uploadAndProcess()">Upload <span class="material-icons-round">rocket_launch</span></button>
+    </div>
+</section>
+
+<!-- STEP 3: Review & Generate -->
+<section class="step" id="step-3">
+    <div id="processing-panel" class="hidden">
+        <div class="glass-panel p-5 rounded-xl border border-primary/30 mb-6">
+            <div class="flex items-center justify-between mb-4"><h3 class="text-sm font-semibold text-white">AI Processing</h3><span class="text-xs text-primary animate-pulse" id="process-status">Running...</span></div>
+            <div class="space-y-3" id="process-steps">
+                <div class="flex items-center gap-3" id="ps-ocr"><div class="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin"></div><span class="text-xs text-white">Extracting text...</span></div>
+                <div class="flex items-center gap-3 opacity-40" id="ps-clean"><div class="w-5 h-5 rounded-full bg-slate-800"></div><span class="text-xs text-slate-500">Cleaning text...</span></div>
+                <div class="flex items-center gap-3 opacity-40" id="ps-gen"><div class="w-5 h-5 rounded-full bg-slate-800"></div><span class="text-xs text-slate-500">Generating exam...</span></div>
+            </div>
+        </div>
+    </div>
+    <div id="review-panel" class="hidden">
+        <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-semibold text-slate-300">Extracted Content</h3><span class="text-[10px] text-slate-500" id="word-count">0 words</span></div>
+        <textarea id="cleaned-text" class="w-full bg-[#0d0d12] rounded-lg border border-slate-800 p-4 font-mono text-xs text-slate-300 h-48 resize-y mb-4 focus:border-primary outline-none"></textarea>
+        <button class="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary to-indigo-600 text-white font-semibold flex items-center justify-center gap-2" onclick="generateExam()"><span class="material-icons-round">auto_awesome</span>Generate Exam Paper</button>
+    </div>
+    <div id="exam-panel" class="hidden">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-white flex items-center gap-2"><span class="material-icons-round text-primary">description</span>Generated Paper</h3>
+            <button class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 text-xs hover:text-white flex items-center gap-1" onclick="generateExam()"><span class="material-icons-round text-sm">refresh</span>Regenerate</button>
+        </div>
+        <div class="w-full bg-white text-slate-900 rounded-sm shadow-2xl overflow-hidden mb-6 max-h-[50vh] overflow-y-auto" id="paper-preview"></div>
+        <button class="w-full py-3.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold flex items-center justify-center gap-2" onclick="goStep(4)"><span class="material-icons-round">check_circle</span>Looks Good!</button>
+    </div>
+</section>
+
+<!-- STEP 4: Download -->
+<section class="step" id="step-4">
+    <div class="text-center mb-6">
+        <div class="text-5xl mb-4">🎉</div>
+        <h2 class="text-2xl font-bold text-white mb-2">Your Exam is Ready!</h2>
+    </div>
+    
+    <!-- Custom Name Input -->
+    <div class="mb-6">
+        <label class="block text-sm text-slate-400 mb-2">Give it a name (for Google Drive)</label>
+        <input type="text" id="custom-name" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:border-primary outline-none" placeholder="e.g., Chemistry Unit 1 Test">
+    </div>
+    
+    <!-- Download Buttons -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <button class="py-4 rounded-xl bg-gradient-to-br from-red-500 to-orange-500 text-white font-semibold flex flex-col items-center gap-1 active:scale-95 transition-all" onclick="downloadPDF()">
+            <span class="material-icons-round text-2xl">picture_as_pdf</span>PDF
+        </button>
+        <button class="py-4 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold flex flex-col items-center gap-1 active:scale-95 transition-all" onclick="downloadDOCX()">
+            <span class="material-icons-round text-2xl">description</span>DOCX
+        </button>
+    </div>
+    
+    <!-- Upload to Drive Button -->
+    <button id="btn-upload-drive" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-semibold flex items-center justify-center gap-2 mb-4 active:scale-95 transition-all" onclick="uploadToDrive()">
+        <span class="material-icons-round">cloud_upload</span>
+        Save to Google Drive
+    </button>
+    
+    <div id="drive-upload-status" class="hidden mb-4 p-4 rounded-xl bg-green-500/10 border border-green-500/30 text-center">
+        <span class="material-icons-round text-green-400 text-3xl mb-2">check_circle</span>
+        <p class="text-green-400 font-medium">Uploaded to Google Drive!</p>
+        <a id="drive-link" href="#" target="_blank" class="text-primary text-sm underline">View in Drive →</a>
+    </div>
+    
+    <button class="w-full py-3 rounded-xl bg-slate-800 text-slate-300 font-medium flex items-center justify-center gap-2" onclick="startOver()">
+        <span class="material-icons-round text-sm">replay</span>Generate Another
+    </button>
+    
+    <p class="text-center text-[10px] text-slate-600 mt-4">Local files auto-delete after 7 days</p>
+</section>
+
+</main>
+
+<!-- Footer -->
+<div class="fixed bottom-0 left-0 w-full text-center py-3 text-[10px] text-slate-600 bg-gradient-to-t from-background-dark to-transparent pointer-events-none max-w-lg mx-auto">Made with ❤️ by GHORI ACADEMY</div>
+
+</div>
+
+<!-- History Modal -->
+<div id="history-modal" class="modal">
+    <div class="w-full max-w-lg mx-4 max-h-[80vh] overflow-hidden rounded-2xl glass-panel">
+        <div class="p-5 border-b border-white/10 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="material-icons-round text-primary">folder</span>Saved Exams</h3>
+            <button onclick="closeHistory()" class="text-slate-400 hover:text-white"><span class="material-icons-round">close</span></button>
+        </div>
+        <div class="p-5 overflow-y-auto max-h-[60vh]" id="history-list">
+            <p class="text-slate-500 text-sm text-center py-8">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<script>
+// ━━━ STATE ━━━
+let state = { step: 1, subject: null, files: [], sessionId: null, rawText: "", cleanedText: "", exam: null, driveEnabled: false };
+
+// Check Drive status on load
+fetch('/api/drive/status').then(r => r.json()).then(d => { state.driveEnabled = d.enabled && d.folder_configured; if (!state.driveEnabled) document.getElementById('btn-upload-drive').classList.add('hidden'); });
+
+// ━━━ NAVIGATION ━━━
+function goStep(n) {
+    state.step = n;
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(`step-${n}`).classList.add('active');
+    document.getElementById('stepper-progress').style.width = `${((n-1)/3)*100}%`;
+    document.querySelectorAll('.step-dot').forEach(dot => {
+        const s = parseInt(dot.dataset.step);
+        const circle = dot.querySelector('div'), label = dot.querySelector('span');
+        if (s < n) { circle.className = 'w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold border-4 border-background-dark'; circle.innerHTML = '<span class="material-icons-round text-sm">check</span>'; label.className = 'text-[10px] font-medium text-primary'; }
+        else if (s === n) { circle.className = 'w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold border-4 border-background-dark'; circle.textContent = s; label.className = 'text-[10px] font-medium text-white'; }
+        else { circle.className = 'w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-700 text-slate-500 flex items-center justify-center text-xs font-bold'; circle.textContent = s; label.className = 'text-[10px] font-medium text-slate-500'; }
+    });
+}
+
+// ━━━ STEP 1 ━━━
+function selectSubject(el) {
+    document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.subject = el.dataset.subject;
+    document.getElementById('btn-step1-next').disabled = false;
+}
+
+// ━━━ STEP 2 ━━━
+function handleFiles(fileList) { for (let f of fileList) if (state.files.length < 10) state.files.push(f); renderPreviews(); }
+function renderPreviews() {
+    const container = document.getElementById('upload-previews');
+    container.innerHTML = '';
+    state.files.forEach((f, i) => {
+        const div = document.createElement('div');
+        div.className = 'relative rounded-lg overflow-hidden border border-slate-700 bg-slate-900';
+        div.innerHTML = `<img src="${URL.createObjectURL(f)}" class="w-full h-20 object-cover"><button class="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 text-white text-xs" onclick="event.stopPropagation();state.files.splice(${i},1);renderPreviews()">✕</button><div class="text-[9px] text-slate-500 p-1 truncate">${f.name}</div>`;
+        container.appendChild(div);
+    });
+    document.getElementById('upload-count').textContent = `${state.files.length} image(s)`;
+    document.getElementById('btn-step2-next').disabled = state.files.length === 0;
+}
+
+// ━━━ STEP 3 ━━━
+async function uploadAndProcess() {
+    goStep(3); showProcessing(); markStep('ps-ocr', 'running');
+    const formData = new FormData();
+    state.files.forEach(f => formData.append('images', f));
+    try {
+        const uploadResp = await fetch('/api/upload', { method: 'POST', body: formData });
+        const uploadData = await uploadResp.json();
+        if (uploadData.error) { alert('Error: ' + uploadData.error); goStep(2); return; }
+        state.sessionId = uploadData.session_id; state.rawText = uploadData.raw_text;
+        markStep('ps-ocr', 'done'); markStep('ps-clean', 'running');
+        const cleanResp = await fetch('/api/clean', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ raw_text: state.rawText, subject: state.subject }) });
+        const cleanData = await cleanResp.json();
+        state.cleanedText = cleanData.cleaned_text;
+        markStep('ps-clean', 'done');
+        document.getElementById('process-status').textContent = 'Done!';
+        setTimeout(() => { document.getElementById('processing-panel').classList.add('hidden'); document.getElementById('review-panel').classList.remove('hidden'); document.getElementById('cleaned-text').value = state.cleanedText; document.getElementById('word-count').textContent = `${state.cleanedText.split(/\s+/).length} words`; }, 500);
+    } catch (err) { alert('Error: ' + err.message); goStep(2); }
+}
+async function generateExam() {
+    state.cleanedText = document.getElementById('cleaned-text').value;
+    document.getElementById('review-panel').classList.add('hidden');
+    document.getElementById('exam-panel').classList.add('hidden');
+    document.getElementById('processing-panel').classList.remove('hidden');
+    markStep('ps-ocr', 'done'); markStep('ps-clean', 'done'); markStep('ps-gen', 'running');
+    document.getElementById('process-status').textContent = 'Generating...';
+    try {
+        const resp = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cleaned_text: state.cleanedText, subject: state.subject, session_id: state.sessionId }) });
+        const data = await resp.json();
+        if (data.error) { alert('Error: ' + data.error); document.getElementById('processing-panel').classList.add('hidden'); document.getElementById('review-panel').classList.remove('hidden'); return; }
+        state.exam = data.exam; state.sessionId = data.session_id;
+        markStep('ps-gen', 'done');
+        setTimeout(() => { document.getElementById('processing-panel').classList.add('hidden'); document.getElementById('exam-panel').classList.remove('hidden'); renderPaperPreview(); }, 500);
+    } catch (err) { alert('Error: ' + err.message); document.getElementById('processing-panel').classList.add('hidden'); document.getElementById('review-panel').classList.remove('hidden'); }
+}
+function showProcessing() { document.getElementById('processing-panel').classList.remove('hidden'); document.getElementById('review-panel').classList.add('hidden'); document.getElementById('exam-panel').classList.add('hidden'); ['ps-ocr','ps-clean','ps-gen'].forEach(id => markStep(id, 'pending')); }
+function markStep(id, status) {
+    const el = document.getElementById(id), icon = el.querySelector('div'), text = el.querySelector('span');
+    if (status === 'done') { el.className = 'flex items-center gap-3'; el.style.opacity = '1'; icon.className = 'w-5 h-5 rounded-full bg-green-500/20 flex items-center justify-center'; icon.innerHTML = '<span class="material-icons-round text-green-400 text-xs">check</span>'; text.className = 'text-xs text-slate-300'; }
+    else if (status === 'running') { el.className = 'flex items-center gap-3'; el.style.opacity = '1'; icon.className = 'w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin'; icon.innerHTML = ''; text.className = 'text-xs text-white font-medium'; }
+    else { el.className = 'flex items-center gap-3 opacity-40'; icon.className = 'w-5 h-5 rounded-full bg-slate-800'; icon.innerHTML = ''; text.className = 'text-xs text-slate-500'; }
+}
+function renderPaperPreview() {
+    const exam = state.exam;
+    if (!exam) {
+        document.getElementById('paper-preview').innerHTML = '<p class="p-4 text-red-500">Error: No exam data</p>';
+        return;
+    }
+    
+    // Safe getters with fallbacks
+    const title = exam.exam_title || 'Annual Examination';
+    const subject = exam.subject || state.subject || 'Subject';
+    const totalMarks = exam.total_marks || '—';
+    const timeAllowed = exam.time_allowed || '—';
+    const sections = exam.sections || [];
+    
+    let html = `
+        <div class="bg-slate-50 p-4 border-b-2 border-slate-300">
+            <div class="text-center">
+                <div class="font-bold text-lg tracking-widest uppercase">GHORI ACADEMY</div>
+                <div class="text-sm">${title}</div>
+                <div class="font-bold text-sm mt-1">Subject: ${subject}</div>
+            </div>
+            <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-3 pt-2 border-t border-slate-200">
+                <span>Marks: ${totalMarks}</span>
+                <span>Time: ${timeAllowed}</span>
+            </div>
+        </div>
+        <div class="p-4 paper-texture space-y-3 text-xs">`;
+    
+    let currentSection = '';
+    
+    for (const sec of sections) {
+        const sectionName = sec.section_name || 'Section';
+        const questionLabel = sec.question_label || 'Q';
+        const sectionType = sec.section_type || 'SHORT';
+        const instructions = sec.instructions || '';
+        const attemptRule = sec.attempt_rule || '';
+        const questions = sec.questions || [];
+        
+        if (sectionName !== currentSection) {
+            html += `<div class="font-bold text-[11px] uppercase border-b-2 border-slate-800 pb-0.5 mt-2">${sectionName}</div>`;
+            currentSection = sectionName;
+        }
+        
+        html += `<div class="font-bold underline text-[11px]">${questionLabel}:</div>`;
+        
+        if (instructions) {
+            html += `<div class="italic text-slate-500 text-[10px] ml-2">${instructions}</div>`;
+        }
+        if (attemptRule) {
+            html += `<div class="font-bold text-red-600 text-[10px] ml-2">Note: ${attemptRule}</div>`;
+        }
+        
+        for (const q of questions) {
+            const qNum = q.question_number || '?';
+            const qText = q.question_text || '(Question text missing)';
+            const qMarks = q.marks || '?';
+            const options = q.options || {};
+            const subParts = q.sub_parts || [];
+            
+            if (sectionType === 'MCQ' || sectionType === 'MCQ_MIXED') {
+                html += `<div class="mt-1"><span class="font-bold">(${qNum})</span> ${qText}</div>`;
+                if (Object.keys(options).length > 0) {
+                    html += '<div class="ml-4 grid grid-cols-2 gap-x-4 gap-y-0.5 mt-1">';
+                    for (const L of ['A', 'B', 'C', 'D']) {
+                        const optText = options[L] || '';
+                        if (optText) {
+                            html += `<div><span class="font-bold">(${L})</span> ${optText}</div>`;
+                        }
+                    }
+                    html += '</div>';
+                }
+            } else if (subParts.length > 0) {
+                html += `<div class="mt-1"><span class="font-bold">${questionLabel}.</span> <span class="text-slate-500">[${qMarks} Marks]</span></div>`;
+                for (const sp of subParts) {
+                    const partLetter = sp.part || '?';
+                    const partText = sp.text || '(Sub-question text missing)';
+                    const partMarks = sp.marks || '?';
+                    html += `<div class="ml-4"><span class="font-bold">(${partLetter})</span> ${partText} <span class="text-slate-500">[${partMarks}]</span></div>`;
+                }
+            } else {
+                html += `<div class="mt-1"><span class="font-bold">(${qNum})</span> ${qText} <span class="text-slate-400 float-right">[${qMarks}]</span></div>`;
+            }
+        }
+    }
+    
+    html += `</div><div class="text-center py-3 border-t-2 border-slate-300 font-bold text-[10px] tracking-widest">✦ END OF PAPER ✦</div>`;
+    
+    document.getElementById('paper-preview').innerHTML = html;
+}
+
+// ━━━ STEP 4: Downloads ━━━
+async function downloadPDF() {
+    const subject = state.exam?.subject || state.subject || 'exam';
+    try {
+        const resp = await fetch('/api/download/pdf', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ exam: state.exam, session_id: state.sessionId }) 
+        });
+        if (!resp.ok) throw new Error('Download failed');
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ghori_academy_${subject.toLowerCase().replace(/\s+/g, '_')}_exam.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        alert('PDF download failed: ' + err.message);
+    }
+}
+
+async function downloadDOCX() {
+    const subject = state.exam?.subject || state.subject || 'exam';
+    try {
+        const resp = await fetch('/api/download/docx', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ exam: state.exam, session_id: state.sessionId }) 
+        });
+        if (!resp.ok) throw new Error('Download failed');
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ghori_academy_${subject.toLowerCase().replace(/\s+/g, '_')}_exam.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        alert('DOCX download failed: ' + err.message);
+    }
+}
+
+// ━━━ HISTORY ━━━
+function showHistory() { document.getElementById('history-modal').classList.add('active'); loadHistory(); }
+function closeHistory() { document.getElementById('history-modal').classList.remove('active'); }
+async function loadHistory() {
+    const list = document.getElementById('history-list');
+    list.innerHTML = '<p class="text-slate-500 text-sm text-center py-8">Loading...</p>';
+    try {
+        const resp = await fetch('/api/drive/files');
+        const data = await resp.json();
+        if (!data.files || data.files.length === 0) { list.innerHTML = '<p class="text-slate-500 text-sm text-center py-8">No saved exams yet</p>'; return; }
+        list.innerHTML = data.files.map(f => `
+            <div class="glass-panel rounded-xl p-4 mb-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="material-icons-round text-2xl ${f.type==='pdf'?'text-red-400':'text-blue-400'}">${f.type==='pdf'?'picture_as_pdf':'description'}</span>
+                    <div>
+                        <div class="text-white font-medium text-sm">${f.name}</div>
+                        <div class="text-slate-500 text-[10px]">${new Date(f.created_time).toLocaleDateString()} • ${(parseInt(f.size)/1024).toFixed(0)} KB</div>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <a href="${f.view_link}" target="_blank" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white"><span class="material-icons-round text-sm">visibility</span></a>
+                    <button onclick="deleteFile('${f.id}')" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-red-400"><span class="material-icons-round text-sm">delete</span></button>
+                </div>
+            </div>
+        `).join('');
+    } catch (err) { list.innerHTML = `<p class="text-red-400 text-sm text-center py-8">Error: ${err.message}</p>`; }
+}
+async function deleteFile(fileId) {
+    if (!confirm('Delete this exam?')) return;
+    await fetch(`/api/drive/delete/${fileId}`, { method: 'DELETE' });
+    loadHistory();
+}
+
+function startOver() { state = { step: 1, subject: null, files: [], sessionId: null, rawText: '', cleanedText: '', exam: null, driveEnabled: state.driveEnabled }; document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('selected')); document.getElementById('btn-step1-next').disabled = true; document.getElementById('upload-previews').innerHTML = ''; document.getElementById('upload-count').textContent = 'No images selected'; document.getElementById('file-input').value = ''; document.getElementById('drive-upload-status').classList.add('hidden'); document.getElementById('btn-upload-drive').disabled = false; document.getElementById('btn-upload-drive').innerHTML = '<span class="material-icons-round">cloud_upload</span> Save to Google Drive'; document.getElementById('btn-upload-drive').classList.replace('from-green-500', 'from-yellow-500'); document.getElementById('btn-upload-drive').classList.replace('to-green-600', 'to-amber-500'); goStep(1); }
+</script>
+</body>
+</html>
