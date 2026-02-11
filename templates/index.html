@@ -4,6 +4,12 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>ExamGen AI — GHORI ACADEMY</title>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#6b5be6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ExamGen">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -447,6 +453,11 @@ async function deleteFile(fileId) {
 }
 
 function startOver() { state = { step: 1, subject: null, files: [], sessionId: null, rawText: '', cleanedText: '', exam: null, driveEnabled: state.driveEnabled }; document.querySelectorAll('.subject-card').forEach(c => c.classList.remove('selected')); document.getElementById('btn-step1-next').disabled = true; document.getElementById('upload-previews').innerHTML = ''; document.getElementById('upload-count').textContent = 'No images selected'; document.getElementById('file-input').value = ''; document.getElementById('drive-upload-status').classList.add('hidden'); document.getElementById('btn-upload-drive').disabled = false; document.getElementById('btn-upload-drive').innerHTML = '<span class="material-icons-round">cloud_upload</span> Save to Google Drive'; document.getElementById('btn-upload-drive').classList.replace('from-green-500', 'from-yellow-500'); document.getElementById('btn-upload-drive').classList.replace('to-green-600', 'to-amber-500'); goStep(1); }
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/static/sw.js');
+}
 </script>
 </body>
 </html>

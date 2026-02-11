@@ -15,6 +15,7 @@ from werkzeug.utils import secure_filename
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from flask import send_from_directory
 from docx.enum.table import WD_TABLE_ALIGNMENT
 
 from config import *
@@ -676,6 +677,9 @@ def download_docx():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory('static', filename)
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # GOOGLE DRIVE ROUTES (NEW)
